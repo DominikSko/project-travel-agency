@@ -46,7 +46,7 @@ describe('Component TripSummary', () => {
     expect(renderedCost).toEqual(`from ${expectedCost}`);   // do omówienia
     expect(renderedDays).toEqual(`${expactedDays} days`);   // do omówienia
 
-    console.log(component.debug());
+    //console.log(component.debug());
   });
 
   it('should render correct tags', () => {         // do omówienia
@@ -65,6 +65,6 @@ describe('Component TripSummary', () => {
     const component = shallow(<TripSummary id='test' image='image' name='name' cost='{expectedCost}' days={1} tags={[]} />);
     const checkedDiv = component.find('.tags').exists();
     expect(checkedDiv).toEqual(false);
-    console.log(component.debug());
+    //console.log(component.debug());
   });
 });
