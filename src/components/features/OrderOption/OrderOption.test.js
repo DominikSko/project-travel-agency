@@ -1,6 +1,7 @@
 import React from 'react';
 import {shallow} from 'enzyme';
 import OrderOption from './OrderOption';
+import DatePicker from 'react-datepicker';
 
 describe('Component OrderOption', () => {
   it('should render without crashing', () => {
@@ -61,7 +62,7 @@ describe('Component OrderOption', () => {
   //podczas gdy mockProps.currentValue jest równe id pierwszego obiektu.
   //W ten sposób zasymulujemy sytuację, w której opcja ma już jakąś wartość, którą chcemy zmienić na inną (lub do której dodamy inną, w przypadku checkboxes).
   const testValue = mockProps.values[1].id;
-  //const testValueNumber = 3;
+  const testValueNumber = 3;
 
   for (let type in optionTypes){
     describe(`Component OrderOption with type=${type}`, () => {
@@ -120,6 +121,89 @@ describe('Component OrderOption', () => {
             renderedSubcomponent.find('select').simulate('change', {currentTarget: {value: testValue}}); // Po znalezieniu selecta, wykonujemy na nim metodę .simulate, która przyjmuje jeden lub dwa argumenty. Pierwszym z nich jest rodzaj eventu, jaki ma zostać zasymulowany – w tym wypadku event change
             expect(mockSetOrderOption).toBeCalledTimes(1);  //  sprawdzamy, czy ta funkcja została wykonana dokładnie jeden raz.
             expect(mockSetOrderOption).toBeCalledWith({ [mockProps.id]: testValue }); // sprawdzamy, czy została wywołana z poprawnymi argumentami.
+          });
+          break;
+        }
+
+        case 'icons': {
+          it('contains div with class icon', () => {
+            const div = renderedSubcomponent.find('.icon');
+            expect(div.length).toBe(2);
+            expect(div.at(0).type()).toBe('div');
+            expect(div.at(1).type()).toBe('div');
+          });
+          // Na ostatnim divie z klasą icon zasymuluj kliknięcie. Drugi argument w simulate nie będzie potrzebny.
+          it('should run setOrderOption function on click', () => {
+            renderedSubcomponent.find('.icon .icon').at(0).simulate('click');        // DO OMÓWIENIA TEST
+            expect(mockSetOrderOption).toBeCalledTimes(1);
+            expect(mockSetOrderOption).toBeCalledWith({ [mockProps.id]: testValue});
+          });
+          break;
+        }
+        case 'checkboxes': {
+          it('contains div with class checkboxes and input with type checkbox', () => {
+            const divCheckboxes = renderedSubcomponent.find('.checkboxes');
+            expect(divCheckboxes.length).toBe(1);
+
+            const checkboxInput = divCheckboxes.find('input[type="checkbox"]');
+            expect(checkboxInput.length).toBe(mockProps.values.length);
+
+            expect(checkboxInput.at(0).prop('value')).toBe(mockProps.values[0].id);
+            expect(checkboxInput.at(1).prop('value')).toBe(mockProps.values[1].id);
+          });
+          // musisz znaleźć element, który ma atrybut value o wartości takiej samej, jak wartość stałej testValue.
+          // Na tym elemencie należy zasymulować event change, ale w drugim argumencie zamiast value podać checked: true.
+          // Dzięki temu handler eventu będzie myślał, że ten checkbox został zaznaczony.
+          it('should run setOrderOption function on change', () => {
+            renderedSubcomponent.find(`input[value="${testValue}"]`).simulate('change', {currentTarget: {checked: true}});
+            expect(mockSetOrderOption).toBeCalledTimes(1);
+            expect(mockSetOrderOption).toBeCalledWith({[mockProps.id]: [mockProps.currentValue, testValue]});
+          });
+          break;
+        }
+        case 'number': {
+          it('contains div with class number and input with class inputSmall', () => {  // do omówienia, podobnie jak w pierwszy test w dropdown ?
+            const divNumber = renderedSubcomponent.find('.number');
+            expect(divNumber.length).toBe(1);
+
+            const inputSmallNumber = divNumber.find('input[type="number"]');
+            expect(inputSmallNumber.length).toBe(1);
+          });
+          it('should run setOrderOption function on change', () => {
+            renderedSubcomponent.find('input').simulate('change', {currentTarget: {value: testValueNumber}});
+            expect(mockSetOrderOption).toBeCalledTimes(1);
+            expect(mockSetOrderOption).toBeCalledWith({[mockProps.id]: testValueNumber});
+          });
+          break;
+        }
+        case 'text': {
+          it('contains div with input type text', () => {
+            const divText = renderedSubcomponent.find('div');
+            expect(divText.length).toBe(1);
+
+            const inputText = divText.find('input[type="text"]');
+            expect(inputText.length).toBe(1);
+          });
+
+          it('should run setOrderOption function on change', () => {
+            renderedSubcomponent.find('input[type="text"]').simulate('change', {currentTarget: {value: testValue}});
+            expect(mockSetOrderOption).toBeCalledTimes(1);
+            expect(mockSetOrderOption).toBeCalledWith({[mockProps.id]: testValue});
+          });
+          break;
+        }
+        case 'date': {
+          // W tym wypadku nie mamy inputa czy selecta, ale komponent DatePicker. To właśnie jego musimy znaleźć (po jego nazwie).
+          //Nie musimy jednak go renderować – wystarczy że zasymulujemy na nim event change, a jako drugi argument podamy testValue zamiast obiektu, który do tej pory wstawialiśmy jako drugi argument.
+          it('contains DataPicker', () => {
+            const datePicker = renderedSubcomponent.find(DatePicker);
+            expect(datePicker.length).toBe(1);
+          });
+          it('should run setOrderOption function on change', () => {
+            renderedSubcomponent.find(DatePicker).simulate('change', testValue);
+
+            expect(mockSetOrderOption).toBeCalledTimes(1);
+            expect(mockSetOrderOption).toBeCalledWith({[mockProps.id]: testValue});
           });
           break;
         }
