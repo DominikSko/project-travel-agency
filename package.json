@@ -11,6 +11,7 @@
     "prebuild": "npm run clean",
     "build": "webpack --mode production",
     "lint": "eslint src/",
+    "server": "http-server dist",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage --colors"
